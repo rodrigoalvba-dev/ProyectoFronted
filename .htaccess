@@ -1,0 +1,5 @@
+# Evita que se abran directamente archivos internos (Apache)
+<FilesMatch "^(conexion\.php|funciones\.php|database\.sql|README\.md)$">
+  Require all denied
+</FilesMatch>
+Options -Indexes
