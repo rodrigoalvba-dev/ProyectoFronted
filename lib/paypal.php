@@ -54,4 +54,25 @@ function paypal_api($metodo, $ruta, $cuerpo = null) {
     if (!is_array($datos)) $datos = [];
     return [$codigo, $datos];
 }
+
+function paypal_token() {
+    $ch = curl_init(paypal_url() . "/v1/oauth2/token");
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=client_credentials");
+    curl_setopt($ch, CURLOPT_USERPWD, PAYPAL_CLIENT_ID . ":" . PAYPAL_SECRET);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Accept: application/json"]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    $respuesta = curl_exec($ch);
+    $error = curl_error($ch);
+    $codigo = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $datos = json_decode((string)$respuesta, true);
+    if (!isset($datos["access_token"])) {
+        throw new Exception("PayPal token falló. HTTP $codigo. cURL: $error. Respuesta: $respuesta");
+    }
+    return $datos["access_token"];
+}
+
 ?>
